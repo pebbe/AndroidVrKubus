@@ -23,6 +23,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private float[] view;
     private float[] modelViewProjection;
     private float[] modelView;
+    private float[] forward;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,15 +37,13 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         view = new float[16];
         modelViewProjection = new float[16];
         modelView = new float[16];
+        forward = new float[3];
     }
 
     @Override
     public void onSurfaceCreated(EGLConfig config) {
-        Matrix.setIdentityM(modelCube, 0);
-        // Matrix.translateM(modelCube, 0, 0, 0, -3.0f);
-
         Matrix.setLookAtM(camera, 0,
-                0.0f, 0.0f, 5.0f /* 0.01f */,
+                0.0f, 0.0f, 0.01f,  // 0.01f
                 0.0f, 0.0f, 0.0f,
                 0.0f, 1.0f, 0.0f);
 
@@ -55,6 +54,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     @Override
     public void onNewFrame(HeadTransform headTransform) {
+        headTransform.getForwardVector(forward, 0);
+        Matrix.setIdentityM(modelCube, 0);
+        Matrix.translateM(modelCube, 0, 7.0f * forward[0], 7.0f * forward[1], 7.0f * forward[2]);
     }
 
     @Override
@@ -75,7 +77,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         // Build the ModelView and ModelViewProjection matrices
         // for calculating cube position and light.
-        float[] perspective = eye.getPerspective(0.1f, 10.0f);
+        float[] perspective = eye.getPerspective(0.1f, 100.0f);
         log("perspective", perspective);
         Matrix.multiplyMM(modelView, 0, view, 0, modelCube, 0);
         log("modelView", modelView);

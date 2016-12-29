@@ -11,7 +11,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-public class Kubus {
+public class Kubus1 {
 
     private final static int ARRAY_SIZE = 6 * 6 * 3;
 
@@ -61,56 +61,56 @@ public class Kubus {
         vertexCount ++;
     }
 
-    public Kubus(Context context) {
+    public Kubus1(Context context) {
         vertexCount = 0;
 
         // boven 6
-        punt(-1, 1, -1, 5.0f / 6, 0, 1);
-        punt(-1, 1, 1, 5.0f / 6, 1, 1);
+        punt(-1, 1, -1, 0, 0, 1);
+        punt(-1, 1, 1, 0, 1, 1);
         punt(1, 1, 1, 1, 1, 1);
-        punt(-1, 1, -1, 5.0f / 6, 0, 1);
+        punt(-1, 1, -1, 0, 0, 1);
         punt(1, 1, 1, 1, 1, 1);
         punt(1, 1, -1, 1, 0, 1);
 
         // links 2
-        punt(-1, 1, -1, 1.0f / 6, 0, .85f);
-        punt(-1, -1, -1, 1.0f / 6, 1, .85f);
-        punt(-1, -1, 1, 2.0f / 6, 1, .85f);
-        punt(-1, 1, -1, 1.0f / 6, 0, .85f);
-        punt(-1, -1, 1, 2.0f / 6, 1, .85f);
-        punt(-1, 1, 1, 2.0f / 6, 0, .85f);
+        punt(-1, 1, -1, 0, 0, .85f);
+        punt(-1, -1, -1, 0, 1, .85f);
+        punt(-1, -1, 1, 1, 1, .85f);
+        punt(-1, 1, -1, 0, 0, .85f);
+        punt(-1, -1, 1, 1, 1, .85f);
+        punt(-1, 1, 1, 1, 0, .85f);
 
         // voor 4
-        punt(-1, 1, 1, 3.0f / 6, 0, .7f);
-        punt(-1, -1, 1, 3.0f / 6, 1, .7f);
-        punt(1, -1, 1, 4.0f / 6, 1, .7f);
-        punt(-1, 1, 1, 3.0f / 6, 0, .7f);
-        punt(1, -1, 1, 4.0f / 6, 1, .7f);
-        punt(1, 1, 1, 4.0f / 6, 0, .7f);
+        punt(-1, 1, 1, 0, 0, .7f);
+        punt(-1, -1, 1, 0, 1, .7f);
+        punt(1, -1, 1, 1, 1, .7f);
+        punt(-1, 1, 1, 0, 0, .7f);
+        punt(1, -1, 1, 1, 1, .7f);
+        punt(1, 1, 1, 1, 0, .7f);
 
         // rechts 5
-        punt(1, 1, 1, 4.0f / 6, 0, .4f);
-        punt(1, -1, 1, 4.0f / 6, 1, .4f);
-        punt(1, -1, -1, 5.0f / 6, 1, .4f);
-        punt(1, 1, 1, 4.0f / 6, 0, .4f);
-        punt(1, -1, -1, 5.0f / 6, 1, .4f);
-        punt(1, 1, -1, 5.0f / 6, 0, .4f);
+        punt(1, 1, 1, 0, 0, .4f);
+        punt(1, -1, 1, 0, 1, .4f);
+        punt(1, -1, -1, 1, 1, .4f);
+        punt(1, 1, 1, 0, 0, .4f);
+        punt(1, -1, -1, 1, 1, .4f);
+        punt(1, 1, -1, 1, 0, .4f);
 
         // achter 3
-        punt(1, 1, -1, 2.0f / 6, 0, .55f);
-        punt(1, -1, -1, 2.0f / 6, 1, .55f);
-        punt(-1, -1, -1, 3.0f / 6, 1, .55f);
-        punt(1, 1, -1, 2.0f / 6, 0, .55f);
-        punt(-1, -1, -1, 3.0f / 6, 1, .55f);
-        punt(-1, 1, -1, 3.0f / 6, 0, .55f);
+        punt(1, 1, -1, 0, 0, .55f);
+        punt(1, -1, -1, 0, 1, .55f);
+        punt(-1, -1, -1, 1, 1, .55f);
+        punt(1, 1, -1, 0, 0, .55f);
+        punt(-1, -1, -1, 1, 1, .55f);
+        punt(-1, 1, -1, 1, 0, .55f);
 
         // onder 1
         punt(-1, -1, 1, 0, 0, .25f);
         punt(-1, -1, -1, 0, 1, .25f);
-        punt(1, -1, -1, 1.0f / 6, 1, .25f);
+        punt(1, -1, -1, 1, 1, .25f);
         punt(-1, -1, 1, 0, 0, .25f);
-        punt(1, -1, -1, 1.0f / 6, 1, .25f);
-        punt(1, -1, 1, 1.0f / 6, 0, .25f);
+        punt(1, -1, -1, 1, 1, .25f);
+        punt(1, -1, 1, 1, 0, .25f);
 
 
         ByteBuffer b1 = ByteBuffer.allocateDirect(ARRAY_SIZE * 4);
@@ -143,7 +143,7 @@ public class Kubus {
         GLES20.glGenTextures(1, texturenames, 0);
 
         // Temporary create a bitmap
-        Bitmap bmp = BitmapFactory.decodeResource(context.getResources(), R.raw.dice);
+        Bitmap bmp = BitmapFactory.decodeResource(context.getResources(), R.raw.beton);
 
         // Bind texture to texturename
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
@@ -163,7 +163,6 @@ public class Kubus {
     }
 
     public void draw(float[] mvpMatrix) {
-
         // Add program to OpenGL environment
         GLES20.glUseProgram(mProgram);
         checkGlError("glUseProgram");

@@ -15,8 +15,8 @@ import javax.microedition.khronos.egl.EGLConfig;
 
 public class MainActivity extends GvrActivity implements GvrView.StereoRenderer {
 
-    private Globe1 globe;
-    //private Kubus kubus;
+    //private Globe1 globe;
+    private Kubus1 kubus;
 
     protected float[] modelCube;
     private float[] camera;
@@ -48,8 +48,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                 0.0f, 0.0f, 0.0f,
                 0.0f, 1.0f, 0.0f);
 
-        // kubus = new Kubus(this);
-        globe = new Globe1();
+        kubus = new Kubus1(this);
+        //globe = new Globe1();
+
     }
 
     @Override
@@ -58,7 +59,10 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     @Override
     public void onDrawEye(Eye eye) {
-        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        //float c = 0.6f;
+        //GLES20.glClearColor(c * 0.27f, c * 0.35f, c * 0.39f, 1.0f);
+        GLES20.glEnable(GLES20.GL_CULL_FACE);
+        GLES20.glCullFace(GLES20.GL_BACK);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
         log("camera", camera);
@@ -77,7 +81,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         log("modelView", modelView);
         Matrix.multiplyMM(modelViewProjection, 0, perspective, 0, modelView, 0);
         log("modelViewProjection", modelViewProjection);
-        globe.draw(modelViewProjection);
+
+        //globe.draw(modelViewProjection);
+        kubus.draw(modelViewProjection);
     }
 
     @Override
@@ -121,11 +127,12 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     }
 
     private void log(String s, float[] m) {
+        /*
         Log.i("MYTAG", s + " [ [ " + m[0] + " " + m[4] + " " + m[8] + " " + m[12] + " ]");
         Log.i("MYTAG", s + "   [ " + m[1] + " " + m[5] + " " + m[9] + " " + m[13] + " ]");
         Log.i("MYTAG", s + "   [ " + m[2] + " " + m[6] + " " + m[10] + " " + m[14] + " ]");
         Log.i("MYTAG", s + "   [ " + m[3] + " " + m[7] + " " + m[11] + " " + m[15] + " ] ]");
-
+        */
     }
 
 }

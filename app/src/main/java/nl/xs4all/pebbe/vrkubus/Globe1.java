@@ -11,7 +11,7 @@ import static java.lang.Math.PI;
 
 public class Globe1 {
 
-    private final static int STEP = 5; // gehele deler van 90;
+    private final static int STEP = 15; // gehele deler van 90;
     private final static int ARRAY_SIZE = 6 * (180 / STEP - 1) * (360 / STEP) * 2;
 
 
@@ -48,13 +48,13 @@ public class Globe1 {
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
     private void driehoek(float long1, float lat1, float long2, float lat2, float long3, float lat3) {
-        Coords[vertexCount] = long1 / 180.0f * (float)PI;
-        Coords[vertexCount + 1] = lat1 / 180.0f * (float)PI;
-        Coords[vertexCount + 2] = long2 / 180.0f * (float)PI;
-        Coords[vertexCount + 3] = lat2 / 180.0f * (float)PI;
-        Coords[vertexCount + 4] = long3 / 180.0f * (float)PI;
-        Coords[vertexCount + 5] = lat3 / 180.0f * (float)PI;
-        vertexCount += 6;
+        Coords[COORDS_PER_VERTEX * vertexCount] = long1 / 180.0f * (float)PI;
+        Coords[COORDS_PER_VERTEX * vertexCount + 1] = lat1 / 180.0f * (float)PI;
+        Coords[COORDS_PER_VERTEX * vertexCount + 2] = long2 / 180.0f * (float)PI;
+        Coords[COORDS_PER_VERTEX * vertexCount + 3] = lat2 / 180.0f * (float)PI;
+        Coords[COORDS_PER_VERTEX * vertexCount + 4] = long3 / 180.0f * (float)PI;
+        Coords[COORDS_PER_VERTEX * vertexCount + 5] = lat3 / 180.0f * (float)PI;
+        vertexCount += 3;
     }
 
     public Globe1() {
@@ -69,6 +69,8 @@ public class Globe1 {
                             lon + STEP, lat - STEP);
                 }
             }
+
+            /*
             if (lat < 90) {
                 for (int lon = -180; lon < 180; lon += STEP) {
                     driehoek(
@@ -77,6 +79,7 @@ public class Globe1 {
                             lon + STEP, lat);
                 }
             }
+            */
         }
 
         ByteBuffer bb = ByteBuffer.allocateDirect(ARRAY_SIZE * 4);

@@ -3,7 +3,6 @@ package nl.xs4all.pebbe.vrkubus;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.google.vr.sdk.base.Eye;
 import com.google.vr.sdk.base.GvrActivity;
@@ -24,6 +23,15 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private float[] modelViewProjection;
     private float[] modelView;
     private float[] forward;
+    private float[] other;
+    private Provider provider;
+    private float ox;
+    private float oy;
+    private float oz;
+
+    public interface Provider {
+        public boolean forward(float[] out, float[] in);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +46,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         modelViewProjection = new float[16];
         modelView = new float[16];
         forward = new float[3];
+        other = new float[3];
+        provider = new vertraagd();
     }
 
     @Override
@@ -50,14 +60,41 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         kubus = new Kubus1(this);
         //globe = new Globe1();
 
+        ox = 0;
+        oy = 0;
+        oz = 0;
     }
 
     @Override
     public void onNewFrame(HeadTransform headTransform) {
-        headTransform.getForwardVector(forward, 0);
         Matrix.setIdentityM(modelCube, 0);
+
+        headTransform.getForwardVector(forward, 0);
         Matrix.translateM(modelCube, 0, 7.0f * forward[0], 7.0f * forward[1], 7.0f * forward[2]);
-    }
+
+        // is dit nodig?
+        float f = (float)Math.sqrt((double)(forward[0] * forward[0] + forward[1] * forward[1] + forward[2] * forward[2]));
+        forward[0] = forward[0] / f;
+        forward[1] = forward[1] / f;
+        forward[2] = forward[2] / f;
+
+        if (provider.forward(other, forward)) {
+            ox = other[0];
+            oy = other[1];
+            oz = other[2];
+        }
+
+
+        float roth = (float) Math.atan2((double) forward[0], (double) forward[2]);
+        Matrix.rotateM(modelCube, 0, roth / (float)Math.PI * 180.0f, 0, 1, 0);
+        float rotv = (float) Math.atan2(forward[1], Math.sqrt(forward[0] * forward[0] + forward[2] * forward[2]));
+        Matrix.rotateM(modelCube, 0, -rotv / (float)Math.PI * 180.0f, 1, 0, 0);
+
+        rotv = (float) Math.atan2(oy, Math.sqrt(ox * ox + oz * oz));
+        Matrix.rotateM(modelCube, 0, rotv / (float)Math.PI * 180.0f, 1, 0, 0);
+        roth = (float) Math.atan2(ox, oz);
+        Matrix.rotateM(modelCube, 0, -roth / (float)Math.PI * 180.0f, 0, 1, 0);
+  }
 
     @Override
     public void onDrawEye(Eye eye) {

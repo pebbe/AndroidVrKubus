@@ -14,9 +14,8 @@ import javax.microedition.khronos.egl.EGLConfig;
 
 public class MainActivity extends GvrActivity implements GvrView.StereoRenderer {
 
-    //private Globe1 globe;
-    private Kubus1 kubus;
-    private Globe wereld;
+    private Kubus kubus;
+    private Wereld wereld;
 
     protected float[] modelCube;
     protected float[] modelWorld;
@@ -60,8 +59,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                 0.0f, 0.0f, 0.0f,
                 0.0f, 1.0f, 0.0f);
 
-        kubus = new Kubus1(this);
-        wereld = new Globe(this);
+        kubus = new Kubus(this);
+        wereld = new Wereld(this);
 
         ox = 0;
         oy = 0;

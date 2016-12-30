@@ -1,3 +1,1 @@
-Work in progress.
-
-This doesn't work.
+Kubus in VR die vertraagd meedraait met het hoofd van de kijker.

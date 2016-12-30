@@ -180,6 +180,8 @@ public class Kubus1 {
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
         checkGlError("glTexParameteri");
 
+        GLES20.glDisable(GLES20.GL_BLEND);
+
         mPositionHandle = GLES20.glGetAttribLocation(mProgram, "position");
         checkGlError("glGetAttribLocation position");
         GLES20.glEnableVertexAttribArray(mPositionHandle);

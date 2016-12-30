@@ -16,8 +16,10 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     //private Globe1 globe;
     private Kubus1 kubus;
+    private Globe wereld;
 
     protected float[] modelCube;
+    protected float[] modelWorld;
     private float[] camera;
     private float[] view;
     private float[] modelViewProjection;
@@ -41,6 +43,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
         // Initialize other objects here.
         modelCube = new float[16];
+        modelWorld = new float[16];
         camera = new float[16];
         view = new float[16];
         modelViewProjection = new float[16];
@@ -58,7 +61,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
                 0.0f, 1.0f, 0.0f);
 
         kubus = new Kubus1(this);
-        //globe = new Globe1();
+        wereld = new Globe(this);
 
         ox = 0;
         oy = 0;
@@ -68,9 +71,12 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     @Override
     public void onNewFrame(HeadTransform headTransform) {
         Matrix.setIdentityM(modelCube, 0);
+        Matrix.setIdentityM(modelWorld, 0);
 
         headTransform.getForwardVector(forward, 0);
+
         Matrix.translateM(modelCube, 0, 7.0f * forward[0], 7.0f * forward[1], 7.0f * forward[2]);
+        Matrix.translateM(modelWorld, 0, 7.0f * forward[0], 7.0f * forward[1], 7.0f * forward[2]);
 
         // is dit nodig?
         float f = (float)Math.sqrt((double)(forward[0] * forward[0] + forward[1] * forward[1] + forward[2] * forward[2]));
@@ -83,7 +89,6 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             oy = other[1];
             oz = other[2];
         }
-
 
         float roth = (float) Math.atan2((double) forward[0], (double) forward[2]);
         Matrix.rotateM(modelCube, 0, roth / (float)Math.PI * 180.0f, 0, 1, 0);
@@ -98,30 +103,26 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
 
     @Override
     public void onDrawEye(Eye eye) {
-        //float c = 0.6f;
-        //GLES20.glClearColor(c * 0.27f, c * 0.35f, c * 0.39f, 1.0f);
-        GLES20.glEnable(GLES20.GL_CULL_FACE);
-        GLES20.glCullFace(GLES20.GL_BACK);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-
-        log("camera", camera);
-        log("modelCube", modelCube);
 
         // Apply the eye transformation to the camera.
         Matrix.multiplyMM(view, 0, eye.getEyeView(), 0, camera, 0);
 
-        log("view", view);
-
         // Build the ModelView and ModelViewProjection matrices
         // for calculating cube position and light.
         float[] perspective = eye.getPerspective(0.1f, 100.0f);
-        log("perspective", perspective);
-        Matrix.multiplyMM(modelView, 0, view, 0, modelCube, 0);
-        log("modelView", modelView);
-        Matrix.multiplyMM(modelViewProjection, 0, perspective, 0, modelView, 0);
-        log("modelViewProjection", modelViewProjection);
 
-        //globe.draw(modelViewProjection);
+        Matrix.multiplyMM(modelView, 0, view, 0, modelWorld, 0);
+        Matrix.multiplyMM(modelViewProjection, 0, perspective, 0, modelView, 0);
+
+        GLES20.glDisable(GLES20.GL_CULL_FACE);
+        wereld.draw(modelViewProjection);
+
+        Matrix.multiplyMM(modelView, 0, view, 0, modelCube, 0);
+        Matrix.multiplyMM(modelViewProjection, 0, perspective, 0, modelView, 0);
+
+        GLES20.glEnable(GLES20.GL_CULL_FACE);
+        GLES20.glCullFace(GLES20.GL_BACK);
         kubus.draw(modelViewProjection);
     }
 

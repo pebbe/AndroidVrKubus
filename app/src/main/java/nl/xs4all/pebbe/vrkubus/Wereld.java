@@ -38,7 +38,11 @@ public class Wereld {
             "uniform sampler2D texture;" +
             "varying vec2 pos;" +
             "void main() {" +
-            "    gl_FragColor = texture2D(texture, vec2(pos[0] / 3.14159265 / 2.0 + 0.5, - pos[1] / 1.5707963 / 2.0 - 0.5));" +
+            "    if (pos[1] > 1.05 || pos[1] < -1.05) {" +
+            "        gl_FragColor = texture2D(texture, vec2(sin(pos[0]) * cos(pos[1]) / 2.0 + 0.5, cos(pos[0]) * cos(pos[1]) / 2.0 + 0.5));" +
+            "    } else { " +
+            "        gl_FragColor = texture2D(texture, vec2(pos[0] / 3.14159265 / 2.0 + 0.5, - pos[1] / 1.5707963 / 2.0 - 0.5));" +
+            "    }" +
             "}";
 
     static final int COORDS_PER_VERTEX = 2;

@@ -134,7 +134,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         Matrix.multiplyMM(modelViewProjection, 0, perspective, 0, modelView, 0);
 
         GLES20.glDisable(GLES20.GL_CULL_FACE);
-        wereld.draw(modelViewProjection);
+        wereld.draw(modelViewProjection, modus);
 
         Matrix.multiplyMM(modelView, 0, view, 0, modelCube, 0);
         Matrix.multiplyMM(modelViewProjection, 0, perspective, 0, modelView, 0);

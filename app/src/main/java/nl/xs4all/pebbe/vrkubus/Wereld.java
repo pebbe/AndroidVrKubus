@@ -22,6 +22,7 @@ public class Wereld {
     private final int mProgram;
     private int mPositionHandle;
     private int mMatrixHandle;
+    private int mModusHandle;
     private int[] texturenames;
 
     private final String vertexShaderCode = "" +
@@ -36,12 +37,22 @@ public class Wereld {
     private final String fragmentShaderCode = "" +
             "precision mediump float;" +
             "uniform sampler2D texture;" +
+            "uniform int modus;" +
             "varying vec2 pos;" +
             "void main() {" +
             "    if (pos[1] > 1.05 || pos[1] < -1.05) {" +
             "        gl_FragColor = texture2D(texture, vec2(sin(pos[0]) * cos(pos[1]) / 2.0 + 0.5, cos(pos[0]) * cos(pos[1]) / 2.0 + 0.5));" +
             "    } else { " +
             "        gl_FragColor = texture2D(texture, vec2(pos[0] / 3.14159265 / 2.0 + 0.5, - pos[1] / 1.5707963 / 2.0 - 0.5));" +
+            "    }" +
+            "    if (modus == 0) {" +
+            "      gl_FragColor[0] = min(1.4 * gl_FragColor[0], 1.0);" +
+            "    } else if (modus == 1) {" +
+            "      gl_FragColor[0] = 0.6 * gl_FragColor[0];" +
+            "      gl_FragColor[1] = min(1.2 * gl_FragColor[1], 1.0);" +
+            "    } else {" +
+            "      gl_FragColor[0] = 0.6 * gl_FragColor[0];" +
+            "      gl_FragColor[2] = min(1.4 * gl_FragColor[2], 1.0);" +
             "    }" +
             "}";
 
@@ -127,7 +138,7 @@ public class Wereld {
         bmp.recycle();
     }
 
-    public void draw(float[] mvpMatrix) {
+    public void draw(float[] mvpMatrix, int modus) {
         // Add program to OpenGL environment
         GLES20.glUseProgram(mProgram);
         checkGlError("glUseProgram");
@@ -162,6 +173,11 @@ public class Wereld {
         checkGlError("glGetUniformLocation uMVPMatrix");
         GLES20.glUniformMatrix4fv(mMatrixHandle, 1, false, mvpMatrix, 0);
         checkGlError("glUniformMatrix4fv uMVPMatrix");
+
+        mModusHandle = GLES20.glGetUniformLocation(mProgram, "modus");
+        checkGlError("glGetUniformLocation modus");
+        GLES20.glUniform1i(mModusHandle, modus);
+        checkGlError("glUniformMatrix4fv modus");
 
         // Get handle to textures locations
         int mSamplerLoc = GLES20.glGetUniformLocation (mProgram, "texture" );

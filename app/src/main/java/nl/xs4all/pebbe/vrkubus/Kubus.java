@@ -20,8 +20,7 @@ public class Kubus {
     private final int mProgram;
     private int mPositionHandle;
     private int mColorHandle;
-
-    private int[] texturenames;
+    private int texture;
 
     private final String vertexShaderCode = "" +
             "uniform mat4 uMVPMatrix;" +
@@ -61,7 +60,8 @@ public class Kubus {
         vertexCount ++;
     }
 
-    public Kubus(Context context) {
+    public Kubus(Context context, int texturename) {
+        texture = texturename;
         vertexCount = 0;
 
         // boven 6
@@ -138,10 +138,6 @@ public class Kubus {
         GLES20.glLinkProgram(mProgram);                  // create OpenGL program executables
         checkGlError("glLinkProgram");
 
-        // Generate Textures, if more needed, alter these numbers.
-        texturenames = new int[1];
-        GLES20.glGenTextures(1, texturenames, 0);
-
         // Temporary create a bitmap
         Bitmap bmp = BitmapFactory.decodeResource(context.getResources(), R.raw.beton);
 
@@ -149,7 +145,7 @@ public class Kubus {
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         checkGlError("glActiveTexture");
 
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texturenames[0]);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture);
         checkGlError("glBindTexture");
 
         // Load the bitmap into the bound texture.
@@ -170,7 +166,7 @@ public class Kubus {
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         checkGlError("glActiveTexture");
 
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texturenames[0]);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture);
         checkGlError("glBindTexture");
 
         // Set filtering

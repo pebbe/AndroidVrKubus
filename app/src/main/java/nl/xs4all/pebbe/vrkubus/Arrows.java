@@ -5,63 +5,71 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
-import android.util.Log;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-import static java.lang.Math.PI;
+public class Arrows {
 
-public class Info {
-
-    private final static int ARRAY_SIZE = 2 * 6 * 6;
+    private final static int ARRAY_SIZE = 6 * 3 * 2 * 4;
 
     private FloatBuffer vertexBuffer;
     private final int mProgram;
     private int mPositionHandle;
     private int mMatrixHandle;
-    private int texture;
 
     private final String vertexShaderCode = "" +
             "uniform mat4 uMVPMatrix;" +
-            "attribute vec2 position;" +
-            "varying vec2 color;" +
+            "attribute vec4 position;" +
+            "varying vec3 color;" +
             "void main() {" +
-            "    gl_Position = uMVPMatrix * vec4(position[0] * 2.0 - 1.0, (position[1] * 2.0 - 1.0) * 0.75, 0.0, 1.0);" +
-            "    color = vec2(position[0], 1.0 - position[1]);" +
+            "    gl_Position = uMVPMatrix * vec4(position[0], position[1], position[2], 1.0);" +
+            "    color = vec3(position[3], position[3], 0.5 + 0.5 * position[3]);" +
             "}";
 
     private final String fragmentShaderCode = "" +
             "precision mediump float;" +
             "uniform sampler2D texture;" +
-            "varying vec2 color;" +
+            "varying vec3 color;" +
             "void main() {" +
-            "    gl_FragColor = texture2D(texture, color);" +
+            "    gl_FragColor = vec4(color, 1.0);" +
             "}";
 
-    static final int COORDS_PER_VERTEX = 2;
+    static final int COORDS_PER_VERTEX = 4;
     static float Coords[] = new float[ARRAY_SIZE];
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
     private int vertexCount;
 
-    private void Point (float x, float y) {
-        Coords[COORDS_PER_VERTEX * vertexCount + 0] = x;
+    private void point(float x, float y, float r, float d, float c) {
+        Coords[COORDS_PER_VERTEX * vertexCount] = -d * (float) Math.sin(r) + (float) Math.cos(-r) * x;
         Coords[COORDS_PER_VERTEX * vertexCount + 1] = y;
+        Coords[COORDS_PER_VERTEX * vertexCount + 2] = -d * (float) Math.cos(r) + (float) Math.sin(-r) * x;
+        Coords[COORDS_PER_VERTEX * vertexCount + 3] = c;
         vertexCount++;
-    }
+   }
 
-
-    public Info(Context context, int texturename) {
-        texture = texturename;
+    public Arrows() {
 
         vertexCount = 0;
-        Point(0, 1);
-        Point(0, 0);
-        Point(1, 0);
-        Point(0, 1);
-        Point(1, 0);
-        Point(1, 1);
+        for (int i = 0; i < 3; i++) {
+            float r = (67.5f + 45f * (float)i) / 180.0f * (float)Math.PI;
+            point(-.16f, .32f, r, 3.01f, 0);
+            point(-.16f, -.32f, r, 3.01f, 0);
+            point(.17f, 0, r, 3.01f, 0);
+
+            point(.16f, .32f, -r, 3.01f, 0);
+            point(-.17f, 0, -r, 3.01f, 0);
+            point(.16f, -.32f, -r, 3.01f, 0);
+
+            point(-.15f, .3f, r, 3.0f, 1);
+            point(-.15f, -.3f, r, 3.0f, 1);
+            point(.15f, 0, r, 3.0f, 1);
+
+            point(.15f, .3f, -r, 3.0f, 1);
+            point(-.15f, 0, -r, 3.0f, 1);
+            point(.15f, -.3f, -r, 3.0f, 1);
+        }
 
         ByteBuffer bb = ByteBuffer.allocateDirect(ARRAY_SIZE * 4);
         bb.order(ByteOrder.nativeOrder());
@@ -82,39 +90,12 @@ public class Info {
         GLES20.glLinkProgram(mProgram);                  // create OpenGL program executables
         Util.checkGlError("glLinkProgram");
 
-        // Temporary create a bitmap
-        Bitmap bmp = BitmapFactory.decodeResource(context.getResources(), R.raw.info);
-
-        // Bind texture to texturename
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        Util.checkGlError("glActiveTexture");
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture);
-        Util.checkGlError("glBindTexture");
-
-        // Load the bitmap into the bound texture.
-        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bmp, 0);
-
-        // We are done using the bitmap so we should recycle it.
-        bmp.recycle();
     }
 
     public void draw(float[] mvpMatrix) {
         // Add program to OpenGL environment
         GLES20.glUseProgram(mProgram);
         Util.checkGlError("glUseProgram");
-
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        Util.checkGlError("glActiveTexture");
-
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture);
-        Util.checkGlError("glBindTexture");
-
-        // Set filtering
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
-        Util.checkGlError("glTexParameteri");
-
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-        Util.checkGlError("glTexParameteri");
 
         mPositionHandle = GLES20.glGetAttribLocation(mProgram, "position");
         Util.checkGlError("glGetAttribLocation vPosition");

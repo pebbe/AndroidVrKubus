@@ -19,11 +19,13 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private Kubus kubus;
     private Wereld wereld;
     private Info info;
+    private Arrows arrows;
     private int[] texturenames;
 
     protected float[] modelCube;
     protected float[] modelWorld;
     protected float[] modelInfo;
+    protected float[] modelArrows;
     private float[] camera;
     private float[] view;
     private float[] modelViewProjection;
@@ -50,6 +52,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         modelCube = new float[16];
         modelWorld = new float[16];
         modelInfo = new float[16];
+        modelArrows = new float[16];
         camera = new float[16];
         view = new float[16];
         modelViewProjection = new float[16];
@@ -72,6 +75,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         kubus = new Kubus(this, texturenames[0]);
         wereld = new Wereld(this, texturenames[1]);
         info = new Info(this, texturenames[2]);
+        arrows = new Arrows();
 
         ox = 0;
         oy = 0;
@@ -89,6 +93,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         Matrix.translateM(modelWorld, 0, DISTANCE * forward[0], DISTANCE * forward[1], DISTANCE * forward[2]);
 
         if (modus == -1) {
+                Matrix.setIdentityM(modelArrows, 0);
                 Matrix.setIdentityM(modelInfo, 0);
                 Matrix.translateM(modelInfo, 0, 0, 0, -3);
         }
@@ -156,6 +161,9 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             Matrix.multiplyMM(modelView, 0, view, 0, modelInfo, 0);
             Matrix.multiplyMM(modelViewProjection, 0, perspective, 0, modelView, 0);
             info.draw(modelViewProjection);
+            Matrix.multiplyMM(modelView, 0, view, 0, modelArrows, 0);
+            Matrix.multiplyMM(modelViewProjection, 0, perspective, 0, modelView, 0);
+            arrows.draw(modelViewProjection);
         } else {
             Matrix.multiplyMM(modelView, 0, view, 0, modelCube, 0);
             Matrix.multiplyMM(modelViewProjection, 0, perspective, 0, modelView, 0);

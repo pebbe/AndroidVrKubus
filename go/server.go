@@ -6,13 +6,17 @@ import (
 	"bufio"
 	"fmt"
 	"net"
+	"strings"
+	"sync"
 	"time"
 )
 
 var (
-	x   = util.CheckErr
-	w   = util.WarnErr
-	TAG = "VRC1.0"
+	x      = util.CheckErr
+	w      = util.WarnErr
+	TAG    = "VRC1.0"
+	mu     sync.Mutex
+	queues = make(map[string]chan string)
 )
 
 func main() {
@@ -21,7 +25,7 @@ func main() {
 	defer ln.Close()
 
 	fmt.Println("ADRES: 192.168.178.24")
-	fmt.Println("BEGIN:", TAG)
+	fmt.Println("BEGIN:", TAG, "<id>")
 	fmt.Println("EIND:  quit")
 
 	for {
@@ -44,17 +48,26 @@ func handleConnection(conn net.Conn) {
 		conn.Close()
 	}()
 
-	queue := make(chan string, 10000)
-
 	scanner := bufio.NewScanner(conn)
-	scanner.Scan()
-	if scanner.Text() != TAG {
+	if !scanner.Scan() {
 		return
 	}
+	a := strings.Fields(scanner.Text())
+	if len(a) != 2 || a[0] != TAG {
+		return
+	}
+	fmt.Println("     ", name, "=", a[1])
+
+	mu.Lock()
+	queue, ok := queues[a[1]]
+	if !ok {
+		queue = make(chan string, 10000)
+		queues[a[1]] = queue
+	}
+	mu.Unlock()
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		fmt.Println(name, line)
 		if line == "quit" {
 			return
 		}

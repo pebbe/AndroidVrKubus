@@ -8,14 +8,17 @@ import java.util.Locale;
 // TODO: check for wifi
 // TODO: error handling
 
-public class server implements MainActivity.Provider {
+public class server2 implements MainActivity.Provider {
 
     private static final String address = "192.168.178.24";
     private static final int port = 8448;
 
-    private Socket socket;
-    private DataInputStream input;
-    private PrintStream output;
+    private static final int NR_OF_CONNECTIONS = 8;
+    private int current = 0;
+
+    private Socket[] sockets;
+    private DataInputStream[] inputs;
+    private PrintStream[] outputs;
 
     private float x;
     private float y;
@@ -23,24 +26,33 @@ public class server implements MainActivity.Provider {
     private boolean ok = false;
     private Object xyzokLock = new Object();
 
-    private boolean running = false;
+    private boolean[] runnings;
     private Object runningLock = new Object();
 
-    public server() {
-        running = true;
-        Runnable runnable = new Runnable() {
+    public server2() {
+        sockets = new Socket[NR_OF_CONNECTIONS];
+        inputs = new DataInputStream[NR_OF_CONNECTIONS];
+        outputs = new PrintStream[NR_OF_CONNECTIONS];
+        runnings = new boolean[NR_OF_CONNECTIONS];
+        for (int i = 0; i < NR_OF_CONNECTIONS; i++) {
+            runnings[i] = true;
+        }
+       final long now = System.currentTimeMillis();
+       Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                try {
-                    socket = new Socket(address, port);
-                    input = new DataInputStream(socket.getInputStream());
-                    output = new PrintStream(socket.getOutputStream());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                output.format("VRC1.0 %d\n", System.currentTimeMillis());
-                synchronized (runningLock) {
-                    running = false;
+                for (int i = 0; i < NR_OF_CONNECTIONS; i++) {
+                    try {
+                        sockets[i] = new Socket(address, port);
+                        inputs[i] = new DataInputStream(sockets[i].getInputStream());
+                        outputs[i] = new PrintStream(sockets[i].getOutputStream());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    outputs[i].format("VRC1.0 %d\n", now);
+                    synchronized (runningLock) {
+                        runnings[i] = false;
+                    }
                 }
             }
         };
@@ -53,23 +65,28 @@ public class server implements MainActivity.Provider {
         final float xi = in[0];
         final float yi = in[1];
         final float zi = in[2];
+        final int index = current;
+        current++;
+        if (current == NR_OF_CONNECTIONS) {
+            current = 0;
+        }
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
                 synchronized (runningLock) {
-                    if (running) {
+                    if (runnings[index]) {
                         return;
                     }
-                    running = true;
+                    runnings[index] = true;
                 }
-                output.format(Locale.US, "%f/%f/%f\n", xi, yi, zi);
+                outputs[index].format(Locale.US, "%f/%f/%f\n", xi, yi, zi);
 
                 String response;
                 try {
-                    response = input.readLine(); // TODO deprecated
+                    response = inputs[index].readLine(); // TODO deprecated
                 } catch (Exception e) {
                     synchronized (runningLock) {
-                        running = false;
+                        runnings[index] = false;
                     }
                     return;
                 }
@@ -90,9 +107,8 @@ public class server implements MainActivity.Provider {
                     }
                 }
                 synchronized (runningLock) {
-                    running = false;
+                    runnings[index] = false;
                 }
-
             };
         };
         Thread thread = new Thread(runnable);

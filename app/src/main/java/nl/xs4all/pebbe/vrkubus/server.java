@@ -5,9 +5,14 @@ import java.io.PrintStream;
 import java.net.Socket;
 import java.util.Locale;
 
+// TODO: check for wifi
+// TODO: error handling
+
 public class server implements MainActivity.Provider {
 
-    private Thread myThread;
+    private static final String address = "192.168.178.24";
+    private static final int port = 8448;
+
     private Socket socket;
     private DataInputStream input;
     private PrintStream output;
@@ -16,8 +21,9 @@ public class server implements MainActivity.Provider {
     private float y;
     private float z;
     private boolean ok = false;
+    private Object xyzokLock = new Object();
+
     private boolean running = false;
-    private Object okLock = new Object();
     private Object runningLock = new Object();
 
     public server() {
@@ -26,7 +32,7 @@ public class server implements MainActivity.Provider {
             @Override
             public void run() {
                 try {
-                    socket = new Socket("192.168.178.24", 8448);
+                    socket = new Socket(address, port);
                     input = new DataInputStream(socket.getInputStream());
                     output = new PrintStream(socket.getOutputStream());
                 } catch (Exception e) {
@@ -38,8 +44,8 @@ public class server implements MainActivity.Provider {
                 }
             }
         };
-        myThread = new Thread(runnable);
-        myThread.start();
+        Thread thread = new Thread(runnable);
+        thread.start();
     }
 
     @Override
@@ -60,7 +66,7 @@ public class server implements MainActivity.Provider {
 
                 String response;
                 try {
-                    response = input.readLine();
+                    response = input.readLine(); // TODO deprecated
                 } catch (Exception e) {
                     synchronized (runningLock) {
                         running = false;
@@ -68,7 +74,7 @@ public class server implements MainActivity.Provider {
                     return;
                 }
 
-                synchronized (okLock) {
+                synchronized (xyzokLock) {
                     ok = false;
                     if (response != null) {
                         String[] parts = response.split("/");
@@ -89,11 +95,11 @@ public class server implements MainActivity.Provider {
 
             };
         };
-        Thread t = new Thread(runnable);
-        t.start();
+        Thread thread = new Thread(runnable);
+        thread.start();
 
         boolean retval;
-        synchronized (okLock) {
+        synchronized (xyzokLock) {
             retval = ok;
             if (ok) {
                 out[0] = x;

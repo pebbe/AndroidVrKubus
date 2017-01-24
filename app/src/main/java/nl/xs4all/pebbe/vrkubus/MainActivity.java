@@ -59,7 +59,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         modelView = new float[16];
         forward = new float[3];
         other = new float[3];
-        provider = new vertraagd();
+        provider = new server();
     }
 
     @Override

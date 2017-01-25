@@ -39,7 +39,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private int modus;
 
     public interface Provider {
-        public boolean forward(float[] out, float[] in);
+        boolean forward(float[] out, float[] in);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         modelView = new float[16];
         forward = new float[3];
         other = new float[3];
-        provider = new server2();
+        provider = new server2(this);
     }
 
     @Override
@@ -218,14 +218,4 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     public void onCardboardTrigger() {
         modus = (modus + 1) % 3;
     }
-
-    private void log(String s, float[] m) {
-        /*
-        Log.i("MYTAG", s + " [ [ " + m[0] + " " + m[4] + " " + m[8] + " " + m[12] + " ]");
-        Log.i("MYTAG", s + "   [ " + m[1] + " " + m[5] + " " + m[9] + " " + m[13] + " ]");
-        Log.i("MYTAG", s + "   [ " + m[2] + " " + m[6] + " " + m[10] + " " + m[14] + " ]");
-        Log.i("MYTAG", s + "   [ " + m[3] + " " + m[7] + " " + m[11] + " " + m[15] + " ] ]");
-        */
-    }
-
 }

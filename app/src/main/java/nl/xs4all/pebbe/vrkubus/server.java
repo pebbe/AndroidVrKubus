@@ -1,5 +1,7 @@
 package nl.xs4all.pebbe.vrkubus;
 
+import android.content.Context;
+
 import java.io.DataInputStream;
 import java.io.PrintStream;
 import java.net.Socket;
@@ -21,13 +23,22 @@ public class server implements MainActivity.Provider {
     private float y;
     private float z;
     private boolean ok = false;
-    private Object xyzokLock = new Object();
+    final private Object xyzokLock = new Object();
 
     private boolean running = false;
-    private Object runningLock = new Object();
+    final private Object runningLock = new Object();
 
-    public server() {
+    public server(Context context) {
         running = true;
+
+        MyDBHandler handler = new MyDBHandler(context, null, null, 1);
+        String value = handler.findSetting("uid");
+        if (value.equals("")) {
+            value = "" + System.currentTimeMillis();
+            handler.addSetting("uid", value);
+        }
+        final String uid = value;
+
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -38,7 +49,7 @@ public class server implements MainActivity.Provider {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                output.format("VRC1.0 %d\n", System.currentTimeMillis());
+                output.format("VRC1.0 %s\n", uid);
                 synchronized (runningLock) {
                     running = false;
                 }
@@ -92,8 +103,7 @@ public class server implements MainActivity.Provider {
                 synchronized (runningLock) {
                     running = false;
                 }
-
-            };
+            }
         };
         Thread thread = new Thread(runnable);
         thread.start();

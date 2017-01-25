@@ -1,5 +1,7 @@
 package nl.xs4all.pebbe.vrkubus;
 
+import android.content.Context;
+
 import java.io.DataInputStream;
 import java.io.PrintStream;
 import java.net.Socket;
@@ -24,12 +26,12 @@ public class server2 implements MainActivity.Provider {
     private float y;
     private float z;
     private boolean ok = false;
-    private Object xyzokLock = new Object();
+    final private Object xyzokLock = new Object();
 
     private boolean[] runnings;
-    private Object runningLock = new Object();
+    final private Object runningLock = new Object();
 
-    public server2() {
+    public server2(Context context) {
         sockets = new Socket[NR_OF_CONNECTIONS];
         inputs = new DataInputStream[NR_OF_CONNECTIONS];
         outputs = new PrintStream[NR_OF_CONNECTIONS];
@@ -37,8 +39,16 @@ public class server2 implements MainActivity.Provider {
         for (int i = 0; i < NR_OF_CONNECTIONS; i++) {
             runnings[i] = true;
         }
-       final long now = System.currentTimeMillis();
-       Runnable runnable = new Runnable() {
+
+        MyDBHandler handler = new MyDBHandler(context, null, null, 1);
+        String value = handler.findSetting("uid");
+        if (value.equals("")) {
+            value = "" + System.currentTimeMillis();
+            handler.addSetting("uid", value);
+        }
+        final String uid = value;
+
+        Runnable runnable = new Runnable() {
             @Override
             public void run() {
                 for (int i = 0; i < NR_OF_CONNECTIONS; i++) {
@@ -49,7 +59,7 @@ public class server2 implements MainActivity.Provider {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    outputs[i].format("VRC1.0 %d\n", now);
+                    outputs[i].format("VRC1.0 %s\n", uid);
                     synchronized (runningLock) {
                         runnings[i] = false;
                     }
@@ -66,10 +76,7 @@ public class server2 implements MainActivity.Provider {
         final float yi = in[1];
         final float zi = in[2];
         final int index = current;
-        current++;
-        if (current == NR_OF_CONNECTIONS) {
-            current = 0;
-        }
+        current = (current + 1) % NR_OF_CONNECTIONS;
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -109,7 +116,7 @@ public class server2 implements MainActivity.Provider {
                 synchronized (runningLock) {
                     runnings[index] = false;
                 }
-            };
+            }
         };
         Thread thread = new Thread(runnable);
         thread.start();

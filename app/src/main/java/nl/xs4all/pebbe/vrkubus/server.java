@@ -73,7 +73,7 @@ public class server implements MainActivity.Provider {
                     }
                     running = true;
                 }
-                output.format(Locale.US, "%f/%f/%f\n", xi, yi, zi);
+                output.format(Locale.US, "%f %f %f\n", xi, yi, zi);
 
                 String response;
                 try {
@@ -88,7 +88,7 @@ public class server implements MainActivity.Provider {
                 synchronized (xyzokLock) {
                     ok = false;
                     if (response != null) {
-                        String[] parts = response.split("/");
+                        String[] parts = response.trim().split("[ \t]+");
                         if (parts.length > 2) {
                             try {
                                 x = Float.parseFloat(parts[0]);

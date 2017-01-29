@@ -61,10 +61,10 @@ start the Android app for the first time on two phones at exactly the
 same time.)
 
 Then the server waits for lines consisting of three values, separated by
-a space: the input vector. After each line, the server **immediately**
-sends a line with an output vector (three values separated by a space),
-or with the string `nil` if there is currently no output vector
-available.
+a space: the input vector. After each line it receives, the server
+**immediately** sends a line with an output vector (three values
+separated by a space), or with the string `nil` if there is currently no
+output vector available.
 
 There is no special link between the input vector, the output vector,
 and the connection. An input vector on one connection may result in an

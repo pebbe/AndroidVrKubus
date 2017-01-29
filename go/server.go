@@ -24,10 +24,6 @@ func main() {
 	x(err)
 	defer ln.Close()
 
-	fmt.Println("ADRES: 192.168.178.24")
-	fmt.Println("BEGIN:", TAG, "<id>")
-	fmt.Println("EIND:  quit")
-
 	for {
 		conn, err := ln.Accept()
 		if w(err) != nil {

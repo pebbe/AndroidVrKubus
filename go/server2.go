@@ -1,7 +1,7 @@
 /*
 
-This server sends the coordinates it gets from an app
-back to the same app, with a delay of one second.
+This server expects connections from two apps. Coordinates
+it gets from one app are send to the other, and vice verse.
 
 */
 
@@ -15,7 +15,6 @@ import (
 	"net"
 	"strings"
 	"sync"
-	"time"
 )
 
 var (
@@ -23,7 +22,10 @@ var (
 	w      = util.WarnErr
 	TAG    = "VRC1.0"
 	mu     sync.Mutex
-	queues = make(map[string]chan string)
+	queue1 = make(chan string, 10)
+	queue2 = make(chan string, 10)
+	app1   string
+	app2   string
 )
 
 func main() {
@@ -61,11 +63,19 @@ func handleConnection(conn net.Conn) {
 	}
 	fmt.Println("     ", name, "=", a[1])
 
+	var cIn, cOut chan string
 	mu.Lock()
-	queue, ok := queues[a[1]]
-	if !ok {
-		queue = make(chan string, 10000)
-		queues[a[1]] = queue
+	if app1 == a[1] || app1 == "" {
+		app1 = a[1]
+		cIn = queue1
+		cOut = queue2
+	} else if app2 == a[1] || app2 == "" {
+		app2 = a[1]
+		cIn = queue2
+		cOut = queue1
+	} else {
+		mu.Unlock()
+		return
 	}
 	mu.Unlock()
 
@@ -75,18 +85,15 @@ func handleConnection(conn net.Conn) {
 			return
 		}
 
-		go func(s string) {
-			time.Sleep(1 * time.Second)
-			select {
-			case queue <- s:
-			default:
-			}
-		}(line)
+		select {
+		case cOut <- line:
+		default:
+		}
 
 		line = "nil"
 		for busy := true; busy; {
 			select {
-			case line = <-queue:
+			case line = <-cIn:
 			default:
 				busy = false
 			}

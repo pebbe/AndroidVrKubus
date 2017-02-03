@@ -43,6 +43,8 @@ public class MyDBHandler extends SQLiteOpenHelper {
         values.put(COLUMN_VALUE, value);
 
         SQLiteDatabase db = this.getWritableDatabase();
+
+        db.delete(TABLE_SETTINGS, COLUMN_SETTING + "= \"" + setting + "\"", null);
         db.insert(TABLE_SETTINGS, null, values);
         db.close();
     }

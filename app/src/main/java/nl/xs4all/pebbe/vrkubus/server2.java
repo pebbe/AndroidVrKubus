@@ -12,9 +12,6 @@ import java.util.Locale;
 
 public class server2 implements MainActivity.Provider {
 
-    private static final String address = "192.168.178.24";
-    private static final int port = 8448;
-
     private static final int NR_OF_CONNECTIONS = 8;
     private int current = 0;
 
@@ -31,7 +28,7 @@ public class server2 implements MainActivity.Provider {
     private boolean[] runnings;
     final private Object runningLock = new Object();
 
-    public server2(Context context) {
+    public server2(Context context, String address, int port) {
         sockets = new Socket[NR_OF_CONNECTIONS];
         inputs = new DataInputStream[NR_OF_CONNECTIONS];
         outputs = new PrintStream[NR_OF_CONNECTIONS];
@@ -47,13 +44,15 @@ public class server2 implements MainActivity.Provider {
             handler.addSetting("uid", value);
         }
         final String uid = value;
+        final String addr = address;
+        final int pnum = port;
 
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
                 for (int i = 0; i < NR_OF_CONNECTIONS; i++) {
                     try {
-                        sockets[i] = new Socket(address, port);
+                        sockets[i] = new Socket(addr, pnum);
                         inputs[i] = new DataInputStream(sockets[i].getInputStream());
                         outputs[i] = new PrintStream(sockets[i].getOutputStream());
                     } catch (Exception e) {

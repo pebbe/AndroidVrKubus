@@ -59,7 +59,27 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         modelView = new float[16];
         forward = new float[3];
         other = new float[3];
-        provider = new server2(this);
+
+        MyDBHandler handler = new MyDBHandler(this, null, null, 1);
+        String s = handler.findSetting("mode");
+        if (s.equals("0")) {
+            // delayed
+            long delay = 1000;
+            String d = handler.findSetting("delay");
+            if (!d.equals("")) {
+                delay = 500 * (long) Integer.parseInt(d, 10);
+            }
+            provider = new vertraagd(delay);
+        } else {
+            // external server
+            String addr = handler.findSetting("address");
+            String p = handler.findSetting("port");
+            int port = 0;
+            if (!p.equals("")) {
+                port = Integer.parseInt(p, 10);
+            }
+            provider = new server2(this, addr, port);
+        }
     }
 
     @Override

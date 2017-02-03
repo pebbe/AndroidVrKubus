@@ -1,9 +1,10 @@
 <resources>
     <string name="app_name">VR Cube</string>
     <string name="run">Run</string>
-    <string name="self_delayed">Self delayed</string>
-    <string name="external_server">External server</string>
     <string name="mode">Mode:</string>
+    <string name="delay">Delay in seconds:</string>
+    <string name="address">Domain name or IP address:</string>
+    <string name="port">Port number:</string>
     <string-array name="mode_array">
         <item>Self delayed</item>
         <item>External server</item>

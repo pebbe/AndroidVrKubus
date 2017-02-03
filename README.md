@@ -6,7 +6,7 @@ interface, that has one method:
 
     boolean forward(float[] out, float[] in)
 
-The method `forward` receives three floats as `in`, and return three
+The method `forward` receives three floats as `in`, and returns three
 floats as `out` on success. When the return value is `false`, this means
 there are no valid return values at the moment.
 
@@ -22,6 +22,8 @@ There are several classes that implement the `Provider` interface:
   - `server` exchanges the vector with an external server
   - `server2` is like `server`, using multiple connections
 
+The start-up screen lets you choose between `vertraagd` en `server2`.
+
 The providers `server` and `server2` were tested on a private, local
 network. The simple `server` is clearly too slow. The rotation of the
 cube is jerky. With `server2` using eight simultaneous connections, the
@@ -30,26 +32,25 @@ increase the amount of connections. (Though the providers are called
 `server` and `server2`, these turn the Android app into a client. The
 actual server is running somewhere else on the internet.)
 
-There are three values you may want to modify in the file `server2.class`:
-
-    private static final String address = "192.168.178.24";
-    private static final int port = 8448;
+There is one value you may want to modify in the file `server2.class`:
 
     private static final int NR_OF_CONNECTIONS = 8;
 
-There is an example server in the directory `go`: `server.go`. It
-returns the vector it gets to the same Android app it came from, with a
-delay of one second. To compile this, run:
+There are two example servers in the directory `go`: `server.go` and
+`server2.go`. The first returns the vector it gets to the same Android
+app it came from, with a delay of one second. The second exchanges
+vectors between two connected apps. To compile this, run:
 
     export GOPATH=$HOME/go
 	go get github.com/pebbe/util
 	go build server.go
+	go build server2.go
 
-You may want to change the port number in `server.go`:
+You may want to change the port number in `server.go` or `server2.go`:
 
     ln, err := net.Listen("tcp", ":8448")
 
-The behavior of the server is as follows:
+The behavior of a server is as follows:
 
 The first line it gets from a connection consists of the string `VRC1.0`
 followed by a space and an ID string (without spaces). The server
@@ -58,7 +59,8 @@ the connection. The ID string is used to know which connections belong
 to the same client. The Android app generates an ID string the first
 time it is used. It is the current timestamp in milliseconds. (So don't
 start the Android app for the first time on two phones at exactly the
-same time.)
+same time.) The server `server2` rejects connections from more than two
+clients.
 
 Then the server waits for lines consisting of three values, separated by
 a space: the input vector. After each line it receives, the server

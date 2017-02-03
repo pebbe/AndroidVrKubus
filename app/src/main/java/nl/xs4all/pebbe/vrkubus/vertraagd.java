@@ -8,7 +8,8 @@ public class vertraagd implements MainActivity.Provider {
     private long delay = 1000;
     private BlockingQueue queue;
 
-    public vertraagd() {
+    public vertraagd(long d) {
+        delay = d;
         queue = new DelayQueue();
     }
 

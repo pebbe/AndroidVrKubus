@@ -1,3 +1,11 @@
 <resources>
-    <string name="app_name">Delayed VR Cube</string>
+    <string name="app_name">VR Cube</string>
+    <string name="run">Run</string>
+    <string name="self_delayed">Self delayed</string>
+    <string name="external_server">External server</string>
+    <string name="mode">Mode:</string>
+    <string-array name="mode_array">
+        <item>Self delayed</item>
+        <item>External server</item>
+    </string-array>
 </resources>

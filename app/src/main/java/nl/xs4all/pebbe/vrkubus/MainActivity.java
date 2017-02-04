@@ -69,7 +69,12 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
             if (!d.equals("")) {
                 delay = 500 * (long) Integer.parseInt(d, 10);
             }
-            provider = new vertraagd(delay);
+            float enhance = 1.0f;
+            String e = handler.findSetting("enhance");
+            if (!e.equals("")) {
+                enhance = 0.5f * (float) (Integer.parseInt(e, 10) - 4);
+            }
+            provider = new vertraagd(delay, enhance);
         } else {
             // external server
             String addr = handler.findSetting("address");

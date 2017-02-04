@@ -5,8 +5,9 @@
     <string name="delay">Delay in seconds:</string>
     <string name="address">Domain name or IP address:</string>
     <string name="port">Port number:</string>
+    <string name="enhance">Enlarge angle:</string>
     <string-array name="mode_array">
-        <item>Self delayed</item>
+        <item>Built-in</item>
         <item>External server</item>
     </string-array>
 </resources>

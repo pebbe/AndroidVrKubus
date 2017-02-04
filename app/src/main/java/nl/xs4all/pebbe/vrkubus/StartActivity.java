@@ -14,6 +14,7 @@ import android.widget.TextView;
 public class StartActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
     private int delay = 2;
+    private int enhance = 6;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +63,32 @@ public class StartActivity extends AppCompatActivity implements AdapterView.OnIt
             }
         });
 
+        enhance = getIntValue("enhance");
+        if (enhance < 0) {
+            enhance = 6;
+        }
+        setEnhance(enhance);
+
+        SeekBar optEnhance = (SeekBar) findViewById(R.id.opt_enhance);
+        optEnhance.setProgress(enhance);
+        optEnhance.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                setEnhance(i);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                saveValue("enhance", ""+enhance);
+            }
+        });
+
+
         String s = getValue("address");
         TextView tv = (TextView) findViewById(R.id.opt_server_address);
         tv.setText(s);
@@ -97,6 +124,13 @@ public class StartActivity extends AppCompatActivity implements AdapterView.OnIt
         delay = i;
         TextView tv = (TextView) findViewById(R.id.val_delay);
         String s = String.format("%.1f", 0.5 * (float)i);
+        tv.setText(s);
+    }
+
+    private void setEnhance(int i) {
+        enhance = i;
+        TextView tv = (TextView) findViewById(R.id.val_enhance);
+        String s = String.format("%.1f", 0.5 * (float)(i-4));
         tv.setText(s);
     }
 
@@ -136,7 +170,13 @@ public class StartActivity extends AppCompatActivity implements AdapterView.OnIt
         tv.setVisibility(v);
         SeekBar sb = (SeekBar) findViewById(R.id.opt_delay);
         sb.setVisibility(v);
-    }
+        tv = (TextView) findViewById(R.id.lbl_enhance);
+        tv.setVisibility(v);
+        tv = (TextView) findViewById(R.id.val_enhance);
+        tv.setVisibility(v);
+        sb = (SeekBar) findViewById(R.id.opt_enhance);
+        sb.setVisibility(v);
+   }
 
     private void showHideServer(boolean show) {
         int v = show ? View.VISIBLE : View.INVISIBLE;

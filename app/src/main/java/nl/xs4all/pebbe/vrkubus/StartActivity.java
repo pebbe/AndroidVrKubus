@@ -1,7 +1,11 @@
 package nl.xs4all.pebbe.vrkubus;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
@@ -10,6 +14,10 @@ import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import java.io.DataInputStream;
+import java.io.PrintStream;
+import java.net.Socket;
 
 public class StartActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
@@ -136,7 +144,7 @@ public class StartActivity extends AppCompatActivity implements AdapterView.OnIt
 
     private void saveServerValues() {
         TextView tv = (TextView) findViewById(R.id.opt_server_address);
-        String s = tv.getText().toString().trim();
+        String s = tv.getText().toString().trim().replaceAll("\"", "");
         saveValue("address", s);
         tv = (TextView) findViewById(R.id.opt_server_port);
         s = tv.getText().toString().trim();
@@ -190,9 +198,85 @@ public class StartActivity extends AppCompatActivity implements AdapterView.OnIt
         et.setVisibility(v);
     }
 
-    public void run(View view) {
-        saveServerValues();
+    Handler runHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            Bundle bundle = msg.getData();
+            if (bundle != null) {
+                String e = bundle.getString("error", "");
+                if (!e.equals("")) {
+                    alert(e);
+                    return;
+                }
+            }
+            runNow();
+        }
+    };
+
+    public void runNow() {
         Intent i = new Intent(this, MainActivity.class);
         startActivity(i);
+    }
+
+    public void run(View view) {
+        saveServerValues();
+
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                String err = "";
+
+                if (getValue("mode").equals("1")) {
+                    try {
+                        String addr = getValue("address");
+                        if (addr.equals("")) {
+                            throw new Error("Missing domain or address");
+                        }
+                        int port = getIntValue("port");
+                        if (port < 0) {
+                            throw new Error("Missing port number");
+                        }
+                        String uid = getValue("uid");
+                        if (uid.equals("")) {
+                            uid = "" + System.currentTimeMillis();
+                            saveValue("uid", uid);
+                        }
+                        Socket socket = new Socket(addr, port);
+                        DataInputStream input = new DataInputStream(socket.getInputStream());
+                        PrintStream output = new PrintStream(socket.getOutputStream());
+                        output.format("VRC1.0 %s\n", uid);
+                        String result = input.readLine().trim();
+                        if (!result.equals("VRC1.0.OK")) {
+                            throw new  Error("Invalid response from server: " + result);
+                        }
+                        output.format("quit\n");
+                        socket.close();
+                    } catch (Exception|Error e) {
+                        err = e.toString();
+                    }
+                }
+
+                Message msg =  Message.obtain();
+                Bundle bundle = new Bundle();
+                bundle.putString("error", err);
+                msg.setData(bundle);
+                runHandler.sendMessage(msg);
+            }
+        };
+        Thread myThread = new Thread(runnable);
+        myThread.start();
+    }
+
+    public void alert(String err) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(err)
+                .setTitle(R.string.error)
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                    }
+                });
+        builder.show();
     }
 }

@@ -6,6 +6,8 @@
     <string name="address">Domain name or IP address:</string>
     <string name="port">Port number:</string>
     <string name="enhance">Enlarge angle:</string>
+    <string name="ok">OK</string>
+    <string name="error">Error</string>
     <string-array name="mode_array">
         <item>Built-in</item>
         <item>External server</item>

@@ -55,10 +55,11 @@ public class server2 implements MainActivity.Provider {
                         sockets[i] = new Socket(addr, pnum);
                         inputs[i] = new DataInputStream(sockets[i].getInputStream());
                         outputs[i] = new PrintStream(sockets[i].getOutputStream());
+                        outputs[i].format("VRC1.0 %s\n", uid);
+                        inputs[i].readLine();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    outputs[i].format("VRC1.0 %s\n", uid);
                     synchronized (runningLock) {
                         runnings[i] = false;
                     }

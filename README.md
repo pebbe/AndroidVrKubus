@@ -53,14 +53,15 @@ You may want to change the port number in `server.go` or `server2.go`:
 The behavior of a server is as follows:
 
 The first line it gets from a connection consists of the string `VRC1.0`
-followed by a space and an ID string (without spaces). The server
-doesn't send a response. When the line is missing, the server terminates
-the connection. The ID string is used to know which connections belong
-to the same client. The Android app generates an ID string the first
-time it is used. It is the current timestamp in milliseconds. (So don't
-start the Android app for the first time on two phones at exactly the
-same time.) The server `server2` rejects connections from more than two
-clients.
+followed by a space and an ID string (without spaces). When the line is
+missing, the server terminates the connection. The ID string is used to
+know which connections belong to the same client. The Android app
+generates an ID string the first time it is used. It is the current
+timestamp in milliseconds. (So don't start the Android app for the first
+time on two phones at exactly the same time.) The server `server2`
+rejects connections from more than two clients.
+
+When the connection is accepted, the server returns the string `VRC1.0.OK`
 
 Then the server waits for lines consisting of three values, separated by
 a space: the input vector. After each line it receives, the server
@@ -75,5 +76,5 @@ even no guarantee the output vectors are returned in the correct order,
 but I didn't notice this to be a problem visually.
 
 If the server reads the line `quit`, it terminates the connection. But
-the Android app doesn't send a `quit` string, it just disconnects when
-it is stopped.
+the Android app doesn't always send a `quit` string, sometimes it just
+disconnects when it is stopped.

@@ -79,6 +79,7 @@ func handleConnection(conn net.Conn) {
 	}
 	mu.Unlock()
 
+	fmt.Fprintln(conn, TAG+".OK")
 	for scanner.Scan() {
 		line := scanner.Text()
 		if line == "quit" {

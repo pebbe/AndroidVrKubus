@@ -6,6 +6,8 @@
     <string name="address">Domeinnaam of IP-adres:</string>
     <string name="port">Poortnummer:</string>
     <string name="enhance">Hoekvergroting:</string>
+    <string name="ok">OK</string>
+    <string name="error">Fout</string>
     <string-array name="mode_array">
         <item>Ingebouwd</item>
         <item>Externe server</item>

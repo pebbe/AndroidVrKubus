@@ -46,10 +46,11 @@ public class server implements MainActivity.Provider {
                     socket = new Socket(address, port);
                     input = new DataInputStream(socket.getInputStream());
                     output = new PrintStream(socket.getOutputStream());
+                    output.format("VRC1.0 %s\n", uid);
+                    input.readLine();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                output.format("VRC1.0 %s\n", uid);
                 synchronized (runningLock) {
                     running = false;
                 }

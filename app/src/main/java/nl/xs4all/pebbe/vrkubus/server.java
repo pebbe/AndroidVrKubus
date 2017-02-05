@@ -7,9 +7,6 @@ import java.io.PrintStream;
 import java.net.Socket;
 import java.util.Locale;
 
-// TODO: check for wifi
-// TODO: error handling
-
 public class server implements MainActivity.Provider {
 
     private static final String address = "192.168.178.24";
@@ -31,11 +28,11 @@ public class server implements MainActivity.Provider {
     public server(Context context) {
         running = true;
 
-        MyDBHandler handler = new MyDBHandler(context, null, null, 1);
-        String value = handler.findSetting("uid");
+        MyDBHandler handler = new MyDBHandler(context);
+        String value = handler.findSetting(Util.kUid);
         if (value.equals("")) {
             value = "" + System.currentTimeMillis();
-            handler.addSetting("uid", value);
+            handler.addSetting(Util.kUid, value);
         }
         final String uid = value;
 
@@ -78,7 +75,7 @@ public class server implements MainActivity.Provider {
 
                 String response;
                 try {
-                    response = input.readLine(); // TODO deprecated
+                    response = input.readLine();
                 } catch (Exception e) {
                     synchronized (runningLock) {
                         running = false;

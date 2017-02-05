@@ -60,30 +60,33 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         forward = new float[3];
         other = new float[3];
 
-        MyDBHandler handler = new MyDBHandler(this, null, null, 1);
-        String s = handler.findSetting("mode");
-        if (s.equals("0")) {
-            // delayed
-            long delay = 1000;
-            String d = handler.findSetting("delay");
-            if (!d.equals("")) {
-                delay = 500 * (long) Integer.parseInt(d, 10);
-            }
-            float enhance = 1.0f;
-            String e = handler.findSetting("enhance");
-            if (!e.equals("")) {
-                enhance = 0.5f * (float) (Integer.parseInt(e, 10) - 4);
-            }
-            provider = new vertraagd(delay, enhance);
-        } else {
-            // external server
-            String addr = handler.findSetting("address");
-            String p = handler.findSetting("port");
-            int port = 0;
-            if (!p.equals("")) {
-                port = Integer.parseInt(p, 10);
-            }
-            provider = new server2(this, addr, port);
+        MyDBHandler handler = new MyDBHandler(this);
+        switch (handler.findSetting(Util.kMode)) {
+            case Util.vModeDelay:
+                long delay = 1000;
+                String d = handler.findSetting(Util.kDelay);
+                if (!d.equals("")) {
+                    delay = 500 * (long) Integer.parseInt(d, 10);
+                }
+                float enhance = 1.0f;
+                String e = handler.findSetting(Util.kEnhance);
+                if (!e.equals("")) {
+                    enhance = 0.5f * (float) (Integer.parseInt(e, 10) - 4);
+                }
+                provider = new vertraagd(delay, enhance);
+                break;
+            case Util.vModeExtern:
+                // external server
+                String addr = handler.findSetting(Util.kAddress);
+                String p = handler.findSetting(Util.kPort);
+                int port = 0;
+                if (!p.equals("")) {
+                    port = Integer.parseInt(p, 10);
+                }
+                provider = new server2(this, addr, port);
+                break;
+            default:
+                throw new Error("invalid mode");
         }
     }
 

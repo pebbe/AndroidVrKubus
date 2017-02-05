@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import java.io.DataInputStream;
 import java.io.PrintStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 
 public class StartActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
@@ -29,7 +30,7 @@ public class StartActivity extends AppCompatActivity implements AdapterView.OnIt
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
 
-        int i = getIntValue("mode");
+        int i = getIntValue(Util.kMode);
         if (i < 0) {
             i = 0;
         }
@@ -46,7 +47,7 @@ public class StartActivity extends AppCompatActivity implements AdapterView.OnIt
         optMode.setSelection(i);
         optMode.setOnItemSelectedListener(this);
 
-        delay = getIntValue("delay");
+        delay = getIntValue(Util.kDelay);
         if (delay < 0) {
             delay = 2;
         }
@@ -67,11 +68,11 @@ public class StartActivity extends AppCompatActivity implements AdapterView.OnIt
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                saveValue("delay", ""+delay);
+                saveValue(Util.kDelay, ""+delay);
             }
         });
 
-        enhance = getIntValue("enhance");
+        enhance = getIntValue(Util.kEnhance);
         if (enhance < 0) {
             enhance = 6;
         }
@@ -92,16 +93,16 @@ public class StartActivity extends AppCompatActivity implements AdapterView.OnIt
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                saveValue("enhance", ""+enhance);
+                saveValue(Util.kEnhance, ""+enhance);
             }
         });
 
 
-        String s = getValue("address");
+        String s = getValue(Util.kAddress);
         TextView tv = (TextView) findViewById(R.id.opt_server_address);
         tv.setText(s);
 
-        i = getIntValue("port");
+        i = getIntValue(Util.kPort);
         if (i > 0) {
             tv = (TextView) findViewById(R.id.opt_server_port);
             s = "" + i;
@@ -118,7 +119,7 @@ public class StartActivity extends AppCompatActivity implements AdapterView.OnIt
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        saveValue("mode", ""+position);
+        saveValue(Util.kMode, ""+position);
         showHideDelayed(position == 0);
         showHideServer(position == 1);
     }
@@ -144,20 +145,20 @@ public class StartActivity extends AppCompatActivity implements AdapterView.OnIt
 
     private void saveServerValues() {
         TextView tv = (TextView) findViewById(R.id.opt_server_address);
-        String s = tv.getText().toString().trim().replaceAll("\"", "");
-        saveValue("address", s);
+        String s = tv.getText().toString().replaceAll("\"", "").trim();
+        saveValue(Util.kAddress, s);
         tv = (TextView) findViewById(R.id.opt_server_port);
         s = tv.getText().toString().trim();
-        saveValue("port", s);
+        saveValue(Util.kPort, s);
     }
 
     private void saveValue(String key, String value) {
-        MyDBHandler handler = new MyDBHandler(this, null, null, 1);
+        MyDBHandler handler = new MyDBHandler(this);
         handler.addSetting(key, value);
     }
 
     private String getValue(String key) {
-        MyDBHandler handler = new MyDBHandler(this, null, null, 1);
+        MyDBHandler handler = new MyDBHandler(this);
         return handler.findSetting(key);
     }
 
@@ -204,7 +205,7 @@ public class StartActivity extends AppCompatActivity implements AdapterView.OnIt
             super.handleMessage(msg);
             Bundle bundle = msg.getData();
             if (bundle != null) {
-                String e = bundle.getString("error", "");
+                String e = bundle.getString(Util.sError, "");
                 if (!e.equals("")) {
                     alert(e);
                     return;
@@ -227,39 +228,47 @@ public class StartActivity extends AppCompatActivity implements AdapterView.OnIt
             public void run() {
                 String err = "";
 
-                if (getValue("mode").equals("1")) {
-                    try {
-                        String addr = getValue("address");
-                        if (addr.equals("")) {
-                            throw new Error("Missing domain or address");
+                switch (getValue(Util.kMode)) {
+                    case Util.vModeDelay:
+                        break;
+                    case Util.vModeExtern:
+                        // TODO: check for wifi
+                        try {
+                            String addr = getValue(Util.kAddress);
+                            if (addr.equals("")) {
+                                throw new Error("Missing domain or address");
+                            }
+                            int port = getIntValue(Util.kPort);
+                            if (port < 0) {
+                                throw new Error("Missing port number");
+                            }
+                            String uid = getValue(Util.kUid);
+                            if (uid.equals("")) {
+                                uid = "" + System.currentTimeMillis();
+                                saveValue(Util.kUid, uid);
+                            }
+                            Socket socket = new Socket();
+                            socket.connect(new InetSocketAddress(addr, port), 2000);
+                            DataInputStream input = new DataInputStream(socket.getInputStream());
+                            PrintStream output = new PrintStream(socket.getOutputStream());
+                            output.format("VRC1.0 %s\n", uid);
+                            String result = input.readLine().trim();
+                            if (!result.equals("VRC1.0.OK")) {
+                                throw new Error("Invalid response from server: " + result);
+                            }
+                            output.format("quit\n");
+                            socket.close();
+                        } catch (Exception | Error e) {
+                            err = e.toString();
                         }
-                        int port = getIntValue("port");
-                        if (port < 0) {
-                            throw new Error("Missing port number");
-                        }
-                        String uid = getValue("uid");
-                        if (uid.equals("")) {
-                            uid = "" + System.currentTimeMillis();
-                            saveValue("uid", uid);
-                        }
-                        Socket socket = new Socket(addr, port);
-                        DataInputStream input = new DataInputStream(socket.getInputStream());
-                        PrintStream output = new PrintStream(socket.getOutputStream());
-                        output.format("VRC1.0 %s\n", uid);
-                        String result = input.readLine().trim();
-                        if (!result.equals("VRC1.0.OK")) {
-                            throw new  Error("Invalid response from server: " + result);
-                        }
-                        output.format("quit\n");
-                        socket.close();
-                    } catch (Exception|Error e) {
-                        err = e.toString();
-                    }
+                        break;
+                    default:
+                        err = "Invalid mode";
                 }
 
-                Message msg =  Message.obtain();
+                Message msg = Message.obtain();
                 Bundle bundle = new Bundle();
-                bundle.putString("error", err);
+                bundle.putString(Util.sError, err);
                 msg.setData(bundle);
                 runHandler.sendMessage(msg);
             }

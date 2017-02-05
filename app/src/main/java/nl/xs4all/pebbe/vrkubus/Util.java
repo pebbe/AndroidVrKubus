@@ -5,6 +5,16 @@ import android.util.Log;
 
 public class Util {
 
+    public final static String kMode = "mode";
+    public final static String vModeDelay = "0";
+    public final static String vModeExtern = "1";
+    public final static String kDelay = "delay";
+    public final static String kEnhance = "enhance";
+    public final static String kAddress = "address";
+    public final static String kPort = "port";
+    public final static String kUid = "uid";
+    public final static String sError = "error";
+
     public static int loadShader(int type, String shaderCode) {
 
         // create a vertex shader type (GLES20.GL_VERTEX_SHADER)

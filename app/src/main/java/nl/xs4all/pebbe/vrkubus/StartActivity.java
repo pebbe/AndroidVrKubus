@@ -25,6 +25,8 @@ public class StartActivity extends AppCompatActivity implements AdapterView.OnIt
     private int delay = 2;
     private int enhance = 6;
 
+    static final int VR_REQUEST = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -217,7 +219,7 @@ public class StartActivity extends AppCompatActivity implements AdapterView.OnIt
 
     public void runNow() {
         Intent i = new Intent(this, MainActivity.class);
-        startActivity(i);
+        startActivityForResult(i, VR_REQUEST);
     }
 
     public void run(View view) {
@@ -287,5 +289,20 @@ public class StartActivity extends AppCompatActivity implements AdapterView.OnIt
                     }
                 });
         builder.show();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Check which request we're responding to
+        if (requestCode == VR_REQUEST) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                if (data.hasExtra(Util.sError)) {
+                    alert(data.getExtras().getString(Util.sError));
+                }
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 }

@@ -15,6 +15,10 @@ public class Util {
     public final static String kUid = "uid";
     public final static String sError = "error";
 
+    public final static int stOK = 0;
+    public final static int stNIL = 1;
+    public final static int stERROR = 2;
+
     public static int loadShader(int type, String shaderCode) {
 
         // create a vertex shader type (GLES20.GL_VERTEX_SHADER)

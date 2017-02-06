@@ -16,7 +16,12 @@ public class vertraagd implements MainActivity.Provider {
     }
 
     @Override
-    public boolean forward(float[] out, float[] in) {
+    public String getError() {
+        return "";
+    }
+
+    @Override
+    public int forward(float[] out, float[] in) {
         DelayObject object = new DelayObject(in[0], in[1], in[2], delay);
         try {
             queue.put(object);
@@ -25,7 +30,7 @@ public class vertraagd implements MainActivity.Provider {
 
         object = (DelayObject) queue.poll();
         if (object == null) {
-            return false;
+            return Util.stNIL;
         }
 
         DelayObject o;
@@ -45,6 +50,6 @@ public class vertraagd implements MainActivity.Provider {
             out[1] = (float) Math.sin(rotv);
             out[2] = (float) (-Math.cos(roth) * cosrotv);
         }
-        return true;
+        return Util.stOK;
     }
 }

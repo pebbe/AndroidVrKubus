@@ -20,6 +20,8 @@ public class server2 implements MainActivity.Provider {
     private float y;
     private float z;
     private boolean ok = false;
+    private boolean err = false;
+    private String ErrStr = "";
     final private Object xyzokLock = new Object();
 
     private boolean[] runnings;
@@ -50,6 +52,7 @@ public class server2 implements MainActivity.Provider {
                 for (int i = 0; i < NR_OF_CONNECTIONS; i++) {
                     try {
                         sockets[i] = new Socket(addr, pnum);
+                        sockets[i].setSoTimeout(1000);
                         inputs[i] = new DataInputStream(sockets[i].getInputStream());
                         outputs[i] = new PrintStream(sockets[i].getOutputStream());
                         outputs[i].format("VRC1.0 %s\n", uid);
@@ -68,7 +71,12 @@ public class server2 implements MainActivity.Provider {
     }
 
     @Override
-    public boolean forward(float[] out, float[] in) {
+    public String getError() {
+        return ErrStr;
+    }
+
+    @Override
+    public int forward(float[] out, float[] in) {
         final float xi = in[0];
         final float yi = in[1];
         final float zi = in[2];
@@ -92,20 +100,30 @@ public class server2 implements MainActivity.Provider {
                     synchronized (runningLock) {
                         runnings[index] = false;
                     }
+                    synchronized (xyzokLock) {
+                        err = true;
+                        ErrStr = e.toString();
+                    }
                     return;
                 }
 
                 synchronized (xyzokLock) {
                     ok = false;
-                    if (response != null) {
+                    if (response == null) {
+                        err = true;
+                        ErrStr = "No response from remote server";
+                    } else {
                         String[] parts = response.trim().split("[ \t]+");
-                        if (parts.length > 2) {
+                        if (parts.length == 3) {
                             try {
                                 x = Float.parseFloat(parts[0]);
                                 y = Float.parseFloat(parts[1]);
                                 z = Float.parseFloat(parts[2]);
                                 ok = true;
                             } catch (Exception e) {
+                                // shouldn't happen
+                                err = true;
+                                ErrStr = e.toString();
                             }
                         }
                     }
@@ -118,15 +136,19 @@ public class server2 implements MainActivity.Provider {
         Thread thread = new Thread(runnable);
         thread.start();
 
-        boolean retval;
+
+        int retval = Util.stNIL;
         synchronized (xyzokLock) {
-            retval = ok;
-            if (ok) {
+            if (err) {
+                retval = Util.stERROR;
+                err = false;
+            } else if (ok) {
                 out[0] = x;
                 out[1] = y;
                 out[2] = z;
-                ok = false;
+                retval = Util.stOK;
             }
+            ok = false;
         }
         return retval;
     }

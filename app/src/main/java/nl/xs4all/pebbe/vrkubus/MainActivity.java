@@ -1,5 +1,6 @@
 package nl.xs4all.pebbe.vrkubus;
 
+import android.content.Intent;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.os.Bundle;
@@ -39,7 +40,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private int modus;
 
     public interface Provider {
-        boolean forward(float[] out, float[] in);
+        int forward(float[] out, float[] in);
+        String getError();
     }
 
     @Override
@@ -132,7 +134,15 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         forward[1] = forward[1] / f;
         forward[2] = forward[2] / f;
 
-        if (provider.forward(other, forward)) {
+        int retval = provider.forward(other, forward);
+        if (retval == Util.stERROR) {
+            Intent data = new Intent();
+            data.putExtra(Util.sError, provider.getError());
+            setResult(RESULT_OK, data);
+            finish();
+            return;
+        }
+        if (retval == Util.stOK) {
             ox = other[0];
             oy = other[1];
             oz = other[2];

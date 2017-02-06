@@ -10,6 +10,6 @@
     <string name="error">Error</string>
     <string-array name="mode_array">
         <item>Built-in</item>
-        <item>External server</item>
+        <item>Remote server</item>
     </string-array>
 </resources>

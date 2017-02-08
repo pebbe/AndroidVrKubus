@@ -2,13 +2,20 @@ https://play.google.com/store/apps/details?id=nl.xs4all.pebbe.vrkubus
 
 In the file `MainActivity.java`, in the function `onCreate`, a provider
 is chosen. A provider is a class that implements the `Provider`
-interface, that has one method:
+interface, that has two methods:
 
-    boolean forward(float[] out, float[] in)
+    int forward(float[] out, float[] in)
+	String getError()
 
-The method `forward` receives three floats as `in`, and returns three
-floats as `out` on success. When the return value is `false`, this means
-there are no valid return values at the moment.
+The method `forward` receives three floats as `in`, and puts three
+floats into `out` on success. The function returns one of these values:
+
+    Util.stOK       // success
+    Util.stNIL      // no values available at this moment
+    Util.stERROR    // a fatal error occured
+
+After `Util.stError`, the function `getError()` can be used to retreive
+the text of the error.
 
 The three values are the x, y and z of the vector that is the direction
 the user is looking at. X is to the right, y is up, z is forward. The
@@ -17,8 +24,7 @@ of the vector is always 1.
 
 There are several classes that implement the `Provider` interface:
 
-  - `dubbel` doubles the rotation along the y-axis
-  - `vertraagd` delays by one second
+  - `vertraagd` delays the response and/or amplifies the horizontal angle
   - `server` exchanges the vector with an external server
   - `server2` is like `server`, using multiple connections
 

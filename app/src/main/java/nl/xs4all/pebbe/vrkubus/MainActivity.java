@@ -18,7 +18,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
     private static final float DISTANCE = 7.0f;
 
     private Kubus kubus;
-    private Wereld wereld;
+    private Bodem bodem;
+    private Lucht lucht;
     private Info info;
     private Arrows arrows;
     private int[] texturenames;
@@ -103,7 +104,8 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         GLES20.glGenTextures(3, texturenames, 0);
 
         kubus = new Kubus(this, texturenames[0]);
-        wereld = new Wereld(this, texturenames[1]);
+        bodem = new Bodem(this, texturenames[1]);
+        lucht = new Lucht(this);
         info = new Info(this, texturenames[2]);
         arrows = new Arrows();
 
@@ -120,7 +122,7 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         Matrix.setIdentityM(modelInfo, 0);
 
         headTransform.getForwardVector(forward, 0);
-        Matrix.translateM(modelWorld, 0, DISTANCE * forward[0], DISTANCE * forward[1], DISTANCE * forward[2]);
+        //Matrix.translateM(modelWorld, 0, DISTANCE * forward[0], DISTANCE * forward[1], DISTANCE * forward[2]);
 
         if (modus == -1) {
                 Matrix.setIdentityM(modelArrows, 0);
@@ -192,8 +194,12 @@ public class MainActivity extends GvrActivity implements GvrView.StereoRenderer 
         Matrix.multiplyMM(modelView, 0, view, 0, modelWorld, 0);
         Matrix.multiplyMM(modelViewProjection, 0, perspective, 0, modelView, 0);
 
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        GLES20.glDepthFunc(GLES20.GL_LEQUAL);
+
         GLES20.glDisable(GLES20.GL_CULL_FACE);
-        wereld.draw(modelViewProjection, modus);
+        lucht.draw(modelViewProjection);
+        bodem.draw(modelViewProjection, modus);
 
         if (modus == -1) {
             Matrix.multiplyMM(modelView, 0, view, 0, modelInfo, 0);
